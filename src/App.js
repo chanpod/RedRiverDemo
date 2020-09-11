@@ -1,11 +1,12 @@
-import { AppBar, Button, Container, Toolbar, Typography, Grid } from '@material-ui/core';
+import { AppBar, Button, Divider, Drawer, Grid, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import MenuIcon from '@material-ui/icons/Menu';
-import React, {Suspense} from 'react';
+import React, { Suspense, useState } from 'react';
+import { FirebaseAppProvider } from 'reactfire';
 import './App.css';
 import Students from './components/students/Students';
 
-import { FirebaseAppProvider, useFirestoreDocData, useFirestore, SuspenseWithPerf } from 'reactfire';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,18 +37,55 @@ const firebaseConfig = {
 function App() {
 
     const classes = useStyles();
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     return (
         <FirebaseAppProvider firebaseConfig={firebaseConfig}>
             <div className="App">
                 <AppBar position="static">
                     <Toolbar>
+
+                        <div>
+                            <IconButton onClick={() => setDrawerOpen(true)} >
+                                <MenuIcon />
+                            </IconButton>
+                        </div>
+
                         <Typography variant="h6" className={classes.title}>
                             Red River Students
-                    </Typography>
+                        </Typography>
+                        <div>
+
+                        </div>
 
                     </Toolbar>
                 </AppBar>
+
+                <Drawer anchor="left"
+                    open={drawerOpen}>
+
+                    <Grid container direction="column" style={{ minWidth: 200 }}>
+                        <Button onClick={() => setDrawerOpen(false)}>
+                            <KeyboardArrowLeft />
+                        </Button>
+
+                        <Divider />
+
+                        <List>
+                            <ListItem button>
+                              
+                                <ListItemText>
+                                    Home
+                                </ListItemText>
+
+                                <ListItemIcon>
+                                    <KeyboardArrowRight />
+                                </ListItemIcon>
+
+                            </ListItem>
+                        </List>
+                    </Grid>
+                </Drawer>
 
                 <Grid container style={{ margin: 10 }} alignContent="center" justify="center">
                     <Suspense fallback={'loading...'}>

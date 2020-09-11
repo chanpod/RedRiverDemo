@@ -1,5 +1,4 @@
 
-import { useFirestore, useFirestoreDocData } from 'reactfire';
 import { map } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -46,7 +45,7 @@ export default class StudentsService {
                 id: docId
             }
 
-            let newStudentDoc = await this.firestore.collection(STUDENTS_COLLECTION).doc(docId).set(newStudent)
+            await this.firestore.collection(STUDENTS_COLLECTION).doc(docId).set(newStudent)
 
             return newStudent;
         }
@@ -61,7 +60,7 @@ export default class StudentsService {
 
             if (student.id) {
 
-                let newStudentDoc = await this.firestore.collection(STUDENTS_COLLECTION).doc(student.id).set(student)
+                await this.firestore.collection(STUDENTS_COLLECTION).doc(student.id).set(student)
 
                 return student;
             }

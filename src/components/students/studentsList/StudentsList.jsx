@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Button, ListItemAvatar, CardContent, Paper, Card, Avatar, Grid, List, ListItem, IconButton, ListItemIcon, ListItemText, ListItemSecondaryAction, Typography } from '@material-ui/core';
-import StudentsService from '../../../services/StudentsService';
-import { map } from 'lodash';
-import { CheckCircle, Add, Delete, ThreeDRotation, } from '@material-ui/icons';
-import { useFirestore, useFirestoreDocData } from 'reactfire';
+import { Avatar, Button, Card, CardContent, Grid, IconButton, InputAdornment, List, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, Paper, TextField, Typography } from '@material-ui/core';
 import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
-
+import { Add, CheckCircle, Clear, Delete, Search } from '@material-ui/icons';
+import { filter, map } from 'lodash';
+import React, { useState } from 'react';
+import { useFirestore } from 'reactfire';
+import StudentsService from '../../../services/StudentsService';
 import StudentDialog from '../studentDialog/StudentDialog';
+
 
 const useStyles = makeStyles(theme => ({
     card: {
@@ -21,9 +21,15 @@ export default (props) => {
 
     const studentsService = new StudentsService(useFirestore());
     const [open, setOpen] = useState(false);
+    const [searchValue, setFilterValue] = useState("");
     const [studentDialogProps, setStudentDialogConfig] = useState({ open: false, student: {} });
     const [notifyMessage, setNotifyMessage] = useState("Success!");
     const classes = useStyles();
+
+    let { vertical, horizontal } = {
+        vertical: "top",
+        horizontal: "center"
+    }
 
     const notifySuccess = (message) => {
         setOpen(false);
@@ -69,13 +75,32 @@ export default (props) => {
         }
     }
 
+    const filteredStudents = (students) => {
+
+        let filteredStudents = [];
+
+        if (searchValue && searchValue.length > 0) {
+
+            filteredStudents = filter(students, (student) => {
+                let firstNameMatches = student.firstName.toLowerCase().match(searchValue.toLowerCase());
+                let lastNameMatches = student.lastName.toLowerCase().match(searchValue.toLowerCase());
+                return firstNameMatches?.length > 0 || lastNameMatches?.length > 0;
+            })
+        }
+        else {
+            filteredStudents = students;
+        }
+
+        return filteredStudents ?? [];
+    }
+
     const getList = () => {
 
-        if (props.students.length > 0) {
+        if (filteredStudents(props.students).length > 0) {
 
             return (
                 <List style={{ width: "100%" }}>
-                    {map(props.students, ((student, index) => {
+                    {map(filteredStudents(props.students), ((student, index) => {
                         const labelId = `checkbox-list-label-${student.id}`;
 
                         return (
@@ -98,7 +123,7 @@ export default (props) => {
         }
         else {
             return (
-                <Typography>No Students</Typography>
+                <Typography>{props.students.length === 0 ? "No Students. Please Create One" : "No Students Found"}</Typography>
             )
         }
 
@@ -111,9 +136,44 @@ export default (props) => {
                 <Grid container direction="row"
                     alignContent="flex-start" justify="flex-start">
 
-                    <Button onClick={() => showStudentDetails(null)} color="primary" variant="outlined">
-                        <Add /> Student
-                    </Button>
+                    <Grid container>
+
+                        <Grid xs={6} item>
+                            <Grid container justify="flex-start" alignContent="flex-end">
+                                <div>
+                                    <Button onClick={() => showStudentDetails(null)} color="primary" variant="outlined">
+                                        <Add /> Student
+                                </Button>
+                                </div>
+                            </Grid>
+                        </Grid>
+
+                        <Grid xs={6} item >
+                            <Grid container justify="flex-end" alignContent="flex-end">
+                                <TextField InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Search />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setFilterValue("")}>
+                                                <Clear />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+
+                                }}
+                                    id="search-input"
+                                    label="Search"
+                                    placeholder="search"
+                                    value={searchValue}
+                                    onChange={(event) => setFilterValue(event.target.value)}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
 
                 <Card>
@@ -128,7 +188,7 @@ export default (props) => {
 
             <StudentDialog student={studentDialogProps.student} open={studentDialogProps.open} onClose={hideStudentDetails} />
 
-            <Snackbar open={open} autoHideDuration={4000} onClose={handleClose}>
+            <Snackbar anchorOrigin={{ vertical, horizontal }} open={open} autoHideDuration={4000} onClose={handleClose}>
                 <Paper className={classes.card} color="success">
                     <Grid container justify="center" alignContent="center" direction="row">
 
