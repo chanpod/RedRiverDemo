@@ -1,58 +1,73 @@
 
-import { useFirestore } from 'reactfire';
+import { useFirestore, useFirestoreDocData } from 'reactfire';
+import { map } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
-const getStudents = async () => {
-    try {
+const STUDENTS_COLLECTION = "students";
 
-        // return await useFirestore.collection("students");
-        return [{
-            firstName: "Chauncey",
-            lastName: "Philpot",
-            id: "123"
-        }];
+export default class StudentsService {
+
+    constructor(firestore) {
+        this.firestore = firestore;
     }
-    catch (error) {
-        throw error;
+
+    getStudents = async () => {
+        try {
+            const collection = await this.firestore.collection(STUDENTS_COLLECTION);
+            const students = await collection.get();
+
+            return map(students.docs, (studentDoc) => {
+                return studentDoc.data();
+            });
+
+        }
+        catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    setStudents = (students) => {
+        try {
+
+            return students;
+        }
+        catch (error) {
+            return error;
+        }
+    }
+
+    addStudent = async (student) => {
+        try {
+
+            let docId = uuidv4();
+            let newStudent = {
+                ...student,
+                id: docId
+            }
+
+            let newStudentDoc = await this.firestore.collection(STUDENTS_COLLECTION).doc(docId).set(newStudent)
+
+            return newStudent;
+        }
+        catch (error) {
+            return error;
+        }
+
+    }
+
+    deleteStudent = async (studentId) => {
+        try {
+
+            await this.firestore.collection(STUDENTS_COLLECTION).doc(studentId).delete();
+            return true;
+        }
+        catch (error) {
+            return error;
+        }
+
     }
 }
 
-const setStudents = (students) => {
-    try {
 
-        return students;
-    }
-    catch (error) {
-        return error;
-    }
-}
 
-const addStudent = (student) => {
-    try {
-        console.log("we added a student");
-        return student;
-    }
-    catch (error) {
-        return error;
-    }
-
-}
-
-const deleteStudent = (studentId) => {
-    try {
-
-        return true;
-    }
-    catch (error) {
-        return error;
-    }
-
-}
-
-const StudentsService = Object.freeze({
-    getStudents,
-    setStudents,
-    addStudent,
-    deleteStudent
-})
-
-export default StudentsService;

@@ -1,7 +1,7 @@
 import { AppBar, Button, Container, Toolbar, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
-import React from 'react';
+import React, {Suspense} from 'react';
 import './App.css';
 import Students from './components/students/Students';
 
@@ -49,9 +49,10 @@ function App() {
                     </Toolbar>
                 </AppBar>
 
-                <Grid container style={{ margin: 10 }}  alignContent = "center" justify = "center">
-
-                    <Students />
+                <Grid container style={{ margin: 10 }} alignContent="center" justify="center">
+                    <Suspense fallback={'loading...'}>
+                        <Students />
+                    </Suspense>
                 </Grid>
             </div>
         </FirebaseAppProvider>
