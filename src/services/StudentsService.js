@@ -56,6 +56,24 @@ export default class StudentsService {
 
     }
 
+    updateStudent = async (student) => {
+        try {
+
+            if (student.id) {
+
+                let newStudentDoc = await this.firestore.collection(STUDENTS_COLLECTION).doc(student.id).set(student)
+
+                return student;
+            }
+            else {
+                throw new Error("Student must have an Id");
+            }
+        }
+        catch (error) {
+            return error;
+        }
+    }
+
     deleteStudent = async (studentId) => {
         try {
 
